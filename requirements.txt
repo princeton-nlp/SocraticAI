@@ -5,4 +5,5 @@ wolframalpha==5.0.0
 yfinance
 fredapi
 googlesearch-python
+beautifulsoup4
 TA-Lib
