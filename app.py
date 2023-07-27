@@ -33,6 +33,9 @@ class SessionState:
         self.wait_tony = False
         self.interactive_p = None
         self.all_questions_to_tony = ""
+        self.output_buffer = ""
+        self.code_buffer_tmp = ""
+        self.code_buffer = ""
 
 
 @app.route('/')
@@ -104,13 +107,19 @@ def active_message():
                                                                  stdout=subprocess.PIPE, 
                                                                  stderr=subprocess.PIPE, 
                                                                 universal_newlines=True)
+
+                                session_state.interactive_p.stdin.write(session_state.code_buffer)
+                                session_state.interactive_p.stdin.flush()
+
                                 for cd_w in python_code_write:
                                     session_state.interactive_p.stdin.write(cd_w + "\n")
                                     session_state.interactive_p.stdin.flush()
+                                    session_state.code_buffer_tmp += cd_w + "\n"
                             else:
                                 for cd_w in python_code_write:
                                     session_state.interactive_p.stdin.write(cd_w + "\n")
                                     session_state.interactive_p.stdin.flush()
+                                    session_state.code_buffer_tmp += cd_w + "\n"
 
                     if not python_code_exe is None:
 
@@ -120,24 +129,34 @@ def active_message():
                             try:
                                 if len(python_code_exe) > 0:
                                     output_msg, err_msg = session_state.interactive_p.communicate(python_code_exe[0] + "\n", timeout=60)
+                                    session_state.code_buffer_tmp += python_code_exe[0] + "\n"
                                 else:
                                     output_msg, err_msg = session_state.interactive_p.communicate(timeout=60)
 
                                 if len(err_msg) == 0:
-                                    if len(output_msg) > 0:
+
+                                    output_msg_ = output_msg[len(session_state.output_buffer):]
+
+                                    if len(output_msg) > len(session_state.output_buffer):
+                                        session_state.output_buffer = output_msg
+
+                                    if len(output_msg_) > 0:
                                         msg_list.append(
                                             {'role': 'system', 
-                                            'response': f"Ran the above Python scripts and got an output: `{output_msg}`\n"})
-                                        session_state.socrates.add_python_feedback(output_msg)
-                                        session_state.theaetetus.add_python_feedback(output_msg)
-                                        session_state.plato.add_python_feedback(output_msg)
+                                            'response': f"Ran the above Python scripts and got an output: `{output_msg_}`\n"})
+                                        session_state.code_buffer += session_state.code_buffer_tmp + "\n"
+                                        session_state.code_buffer_tmp = ""
+                                        session_state.socrates.add_python_feedback(output_msg_)
+                                        session_state.theaetetus.add_python_feedback(output_msg_)
+                                        session_state.plato.add_python_feedback(output_msg_)
 
                                     else:
-                                        output_msg = "Ran the above Python scripts and but got an empty output. Did you `print()` the results? Please rewrite the program and then execute. To write code, please state @write_code first, and then wrap your code in a markdown block.\n"
+                                        output_msg = "Ran the above Python scripts and got an empty output. You can try print() to get textual output.\n"
                                         msg_list.append(
                                             {'role': 'system', 
                                             'response': output_msg})
-                                    
+                                        session_state.code_buffer += session_state.code_buffer_tmp + "\n"
+                                        session_state.code_buffer_tmp = ""
                                         session_state.socrates.add_python_feedback(output_msg)
                                         session_state.theaetetus.add_python_feedback(output_msg)
                                         session_state.plato.add_python_feedback(output_msg)
@@ -146,7 +165,7 @@ def active_message():
                                     msg_list.append(
                                         {'role': 'system', 
                                         'response': f"Ran the above Python scripts and got an error message: `{err_msg}`\n"})
-
+                                    session_state.code_buffer_tmp = ""
                                     session_state.socrates.add_python_feedback(err_msg)
                                     session_state.theaetetus.add_python_feedback(err_msg)
                                     session_state.plato.add_python_feedback(err_msg)
@@ -158,7 +177,7 @@ def active_message():
                                     msg_list.append(
                                         {'role': 'system', 
                                         'response': f"Ran the above Python scripts and got an error message: `{err_msg}`\n"})
-
+                                    session_state.code_buffer_tmp = ""
                                     session_state.socrates.add_python_feedback(err_msg)
                                     session_state.theaetetus.add_python_feedback(err_msg)
                                     session_state.plato.add_python_feedback(err_msg)
@@ -186,6 +205,9 @@ def active_message():
                     session_state.socrates.history = []
                     session_state.theaetetus.history = []
                     session_state.plato.history = []
+                    session_state.code_buffer_tmp = ""
+                    session_state.code_buffer = ""
+                    session_state.output_buffer = ""
 
                     if ("@final answer" in rep) or ("bye" in rep):
                         msg_list.append(
