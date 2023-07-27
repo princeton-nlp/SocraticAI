@@ -65,7 +65,7 @@ def active_message():
             session_state.dialog_lead, session_state.dialog_follower = session_state.socrates, session_state.theaetetus
             return jsonify([
                 {'role':'socrates',
-                'response': f"Hi Theaetetus, I'm the price analyst. Let's solve this problem together. Please feel free to correct me if I make any logical or mathematical mistakes.\n"}
+                'response': f"Hi Theaetetus, I'm the price analyst. Let's solve this problem together. Let me propose my opinion based on price first and then you can provide your view based on macro economics data.\n"}
                 ])
         else:
             if session_state.in_progress_sub == False and session_state.wait_tony == False:
