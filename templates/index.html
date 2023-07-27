@@ -182,7 +182,7 @@
                     let user_input = $('#user-input').val();
                     if (user_input.trim() !== '') {
                         $('#user-input').val('');
-                        addChatMessage('tony', user_input);
+                        addChatMessage('Mr. Buffet', user_input);
                         $.post('/chat', { user_input: user_input }, function(data) {
                             var msg_count = data.length;
                             if (msg_count > 0) {
@@ -210,6 +210,9 @@
                 let formattedMessage = md.render(message).trim();
                 let chat_history = $('#chat-history');
                 let cssClass = sender + '-message';
+                if (sender === 'Mr. Buffet') {
+                   cssClass = 'tony' + '-message';
+                }
                 chat_history.append('<div class="' + cssClass + '"><strong>' + sender.charAt(0).toUpperCase() + sender.slice(1) + ':</strong><br><div class="markdown">' + formattedMessage + '</div></div>');
                 chat_history.scrollTop(chat_history[0].scrollHeight);
                 chat_history.find('pre code').each(function(i, block) {

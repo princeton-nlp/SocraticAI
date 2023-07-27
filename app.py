@@ -65,7 +65,7 @@ def active_message():
             session_state.dialog_lead, session_state.dialog_follower = session_state.socrates, session_state.theaetetus
             return jsonify([
                 {'role':'socrates',
-                'response': f"Hi Theaetetus, let's solve this problem together. Please feel free to correct me if I make any logical or mathematical mistakes.\n"}
+                'response': f"Hi Theaetetus, I'm the price analyst. Let's solve this problem together. Please feel free to correct me if I make any logical or mathematical mistakes.\n"}
                 ])
         else:
             if session_state.in_progress_sub == False and session_state.wait_tony == False:
@@ -92,7 +92,7 @@ def active_message():
                     session_state.all_questions_to_tony = " ".join(question_to_tony)
                     msg_list.append(
                         {'role': 'system', 
-                         'response': f"Asking Tony: {session_state.all_questions_to_tony}"})
+                         'response': f"Asking Mr. Buffet: {session_state.all_questions_to_tony}"})
                     session_state.wait_tony = True
 
                 elif (not python_code_write is None) or (not python_code_exe is None):
@@ -227,7 +227,7 @@ def active_message():
                         elif feedback:
                             for fed in feedback:
                                 q, a = fed["question"], fed["answer"]
-                                print(f"\033[1mTony:\033[0m Received Question: {q}\n\n  Answer: {a}\n")
+                                print(f"\033[1mMr. Buffet:\033[0m Received Question: {q}\n\n  Answer: {a}\n")
                                 session_state.socrates.add_feedback(q, a)
                                 session_state.theaetetus.add_feedback(q, a)
                                 session_state.plato.add_feedback(q, a)
